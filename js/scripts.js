@@ -88,9 +88,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return formData;
     }
 
+    // Headers Data と Form Data を合体
+    function combineData(headers, formData) {
+        return headers.map(header => {
+            const combinedHeader = { ...header };
+            combinedHeader.forms = formData.filter(form => form.headerId === header.id);
+            if (header.children && header.children.length > 0) {
+                combinedHeader.children = combineData(header.children, formData);
+            }
+            return combinedHeader;
+        });
+    }
+
     // JSONデータをテキストファイルとしてダウンロード
-    function downloadTextFile(content, filename) {
-        const blob = new Blob([content], { type: 'text/plain' });
+    function downloadJSON(jsonData, filename) {
+        const jsonStr = JSON.stringify(jsonData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -101,10 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ボタンクリック時の処理
     document.getElementById('export-json').addEventListener('click', () => {
-        const headers = JSON.stringify(getDataFromHeaders(headersData?.headers || []), null, 2);
-        const forms = JSON.stringify(getFormData(), null, 2);
-        const combinedText = `Headers Data:\n${headers}\n\nForm Data:\n${forms}`;
-        downloadTextFile(combinedText, 'combinedData.txt');
+        const headers = getDataFromHeaders(headersData?.headers || []);
+        const forms = getFormData();
+        const combinedData = combineData(headers, forms);
+        downloadJSON(combinedData, 'combinedData.json');
     });
 
     // デバッグ用にコンソールに出力
