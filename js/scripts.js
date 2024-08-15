@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inputs.forEach(input => {
                 if (input.type === 'radio') {
                     if (input.checked) {
-                        headerFormData[input.name] = input.value;
+                        headerFormData[input.name] = input.value; // 選択されたラジオボタンの値を取得
                     }
                 } else if (input.closest('table')) {
                     // テーブル内の入力はテーブルIDに関連付ける
