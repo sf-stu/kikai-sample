@@ -1,0 +1,11 @@
+{
+    "form1": {
+        "html": "<div class='content'><form id='form1'><label>Name: <input type='text' name='name' /></label><label>Email: <input type='email' name='email' /></label><button type='submit'>送信</button></form></div>"
+    },
+    "table1": {
+        "html": "<div class='content'><table><tr><th>項目1</th><th>項目2</th></tr><tr><td><input type='text' name='item1' /></td><td><input type='text' name='item2' /></td></tr></table><button type='submit'>送信</button></div>"
+    },
+    "radio1": {
+        "html": "<div class='content'><form id='form2'><label><input type='radio' name='choice' value='選択肢1'>選択肢1</label><label><input type='radio' name='choice' value='選択肢2'>選択肢2</label><label><input type='radio' name='choice' value='選択肢3'>選択肢3</label><button type='submit'>送信</button></form></div>"
+    }
+}
