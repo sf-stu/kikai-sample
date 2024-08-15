@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerDiv = document.createElement('div');
         headerDiv.className = `sticky-header header-${type}`;
         headerDiv.setAttribute('data-header-id', id); // ヘッダーIDを属性として設定
-        headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}`;
+        headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : 'child' ? '2' : '3'}`;
         return headerDiv;
     }
 
@@ -90,13 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
             tables.forEach((table, index) => {
                 const tableData = [];
                 const rows = table.querySelectorAll('tr');
-                rows.forEach(row => {
+                rows.forEach((row, rowIndex) => {
                     const rowData = {};
                     const cells = row.querySelectorAll('td');
                     cells.forEach((cell, cellIndex) => {
                         const input = cell.querySelector('input, select, textarea');
                         if (input) {
-                            rowData[`cell${cellIndex + 1}`] = input.value;
+                            rowData[`row${rowIndex + 1}_cell${cellIndex + 1}`] = input.value;
                         }
                     });
                     tableData.push(rowData);
