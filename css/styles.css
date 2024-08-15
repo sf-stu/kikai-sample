@@ -19,8 +19,8 @@ body {
     padding: 0 10px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* 上に固定 */
-    align-items: flex-start; /* 左に固定 */
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .header-parent h1 {
@@ -32,15 +32,15 @@ body {
 .header-child {
     position: -webkit-sticky;
     position: sticky;
-    top: 40px; /* 親ヘッダーの高さと一致 */
+    top: 40px;
     background-color: #555;
     height: 80px;
     color: #fff;
     padding: 0 10px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* 上に固定 */
-    align-items: flex-start; /* 左に固定 */
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .header-child h2 {
@@ -52,15 +52,15 @@ body {
 .header-grandchild {
     position: -webkit-sticky;
     position: sticky;
-    top: 80px; /* 親 + 子ヘッダーの高さと一致 */
+    top: 80px;
     background-color: #888;
     height: 40px;
     color: #fff;
     padding: 0 10px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* 上に固定 */
-    align-items: flex-start; /* 左に固定 */
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .header-grandchild h3 {
