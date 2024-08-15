@@ -1,0 +1,6 @@
+{
+    "form1": {
+        "html": "<div class='content' id='form1-form'><form><label>Name: <input type='text' name='name' /></label><label>Email: <input type='email' name='email' /></label><button type='submit'>送信</button></form></div>"
+    },
+    "table1": {
+        "html": "<div class='content' id='table1'><table><tr><th>項目1</th><th>項目2</th></tr><tr><td><input type='text' /></td><td
