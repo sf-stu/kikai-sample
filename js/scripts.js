@@ -57,54 +57,30 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
         });
 
-    // データ取得用関数
-    function getDataFromHeaders(headers) {
-        return headers.map(header => {
-            const result = {
-                id: header.id,
-                type: header.type,
-                text: header.text,
-                contentId: header.templateId,
-                children: header.children ? getDataFromHeaders(header.children) : []
-            };
-            return result;
-        });
-    }
-
-    // フォームデータおよびテーブルデータ取得用
-    function getFormData() {
-        const forms = document.querySelectorAll('.header-content form');
+    // ヘッダーに関連する全てのフォームデータを取得
+    function getAllFormData() {
         const formData = [];
+        const headers = document.querySelectorAll('.header-content');
 
-        forms.forEach(form => {
-            const headerId = form.closest('.header-content').getAttribute('data-header-id');
-            const formObject = { headerId }; // ヘッダーIDを含める
+        headers.forEach(header => {
+            const headerId = header.getAttribute('data-header-id');
+            const headerFormData = { headerId };
 
-            // 通常のフォームデータ取得
-            new FormData(form).forEach((value, key) => {
-                formObject[key] = value;
+            // 通常のフォームフィールドとテーブル内のフィールドをすべて取得
+            const inputs = header.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.closest('table')) {
+                    // テーブル内の入力はテーブルIDに関連付ける
+                    const tableId = input.closest('table').getAttribute('data-table-id') || `table${headerFormData.headerId}`;
+                    headerFormData[tableId] = headerFormData[tableId] || [];
+                    const cellData = { name: input.name, value: input.value };
+                    headerFormData[tableId].push(cellData);
+                } else {
+                    headerFormData[input.name] = input.value;
+                }
             });
 
-            // テーブルデータ取得
-            const tables = form.querySelectorAll('table');
-            tables.forEach((table, index) => {
-                const tableData = [];
-                const rows = table.querySelectorAll('tr');
-                rows.forEach((row, rowIndex) => {
-                    const rowData = {};
-                    const cells = row.querySelectorAll('td');
-                    cells.forEach((cell, cellIndex) => {
-                        const input = cell.querySelector('input, select, textarea');
-                        if (input) {
-                            rowData[`row${rowIndex + 1}_cell${cellIndex + 1}`] = input.value;
-                        }
-                    });
-                    tableData.push(rowData);
-                });
-                formObject[`table${index + 1}`] = tableData;
-            });
-
-            formData.push(formObject);
+            formData.push(headerFormData);
         });
 
         return formData;
@@ -137,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ボタンクリック時の処理
     document.getElementById('export-json').addEventListener('click', () => {
         // 最新のフォームデータを取得
-        const forms = getFormData();
+        const forms = getAllFormData();
         const headers = getDataFromHeaders(headersData?.headers || []);
         const combinedData = combineData(headers, forms);
         downloadJSON(combinedData, 'combinedData.json');
@@ -145,5 +121,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // デバッグ用にコンソールに出力
     console.log('Headers Data:', getDataFromHeaders(headersData?.headers || []));
-    console.log('Form Data:', getFormData());
+    console.log('Form Data:', getAllFormData());
 });
