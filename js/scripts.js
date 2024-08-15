@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers.forEach(header => {
             const headerElement = createHeaderElement(header.type, header.text);
             parentElement.appendChild(headerElement);
-            const contentElement = createContentElement(templates[header.templateId]?.html || '');
+            const contentElement = createContentElement(templates[header.templateId]?.css || '');
             parentElement.appendChild(contentElement);
             if (header.children && header.children.length > 0) {
                 renderHeaders(header.children, parentElement);
