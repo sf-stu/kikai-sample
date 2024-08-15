@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerDiv = document.createElement('div');
         headerDiv.className = `sticky-header header-${type}`;
         headerDiv.setAttribute('data-header-id', id); // ヘッダーIDを属性として設定
-        headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : 'child' ? '2' : '3'}`;
+        headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}`;
         return headerDiv;
     }
 
@@ -114,8 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ボタンクリック時の処理
     document.getElementById('export-json').addEventListener('click', () => {
-        const headers = getDataFromHeaders(headersData?.headers || []);
+        // 最新のフォームデータを取得
         const forms = getFormData();
+        const headers = getDataFromHeaders(headersData?.headers || []);
         const combinedData = combineData(headers, forms);
         downloadJSON(combinedData, 'combinedData.json');
     });
