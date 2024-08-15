@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // フォームデータ取得用
+    // フォームデータおよびテーブルデータ取得用
     function getFormData() {
         const forms = document.querySelectorAll('.header-content form');
         const formData = [];
@@ -79,9 +79,31 @@ document.addEventListener('DOMContentLoaded', () => {
         forms.forEach(form => {
             const headerId = form.closest('.header-content').getAttribute('data-header-id');
             const formObject = { headerId }; // ヘッダーIDを含める
+
+            // 通常のフォームデータ取得
             new FormData(form).forEach((value, key) => {
                 formObject[key] = value;
             });
+
+            // テーブルデータ取得
+            const tables = form.querySelectorAll('table');
+            tables.forEach((table, index) => {
+                const tableData = [];
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const rowData = {};
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach((cell, cellIndex) => {
+                        const input = cell.querySelector('input, select, textarea');
+                        if (input) {
+                            rowData[`cell${cellIndex + 1}`] = input.value;
+                        }
+                    });
+                    tableData.push(rowData);
+                });
+                formObject[`table${index + 1}`] = tableData;
+            });
+
             formData.push(formObject);
         });
 
