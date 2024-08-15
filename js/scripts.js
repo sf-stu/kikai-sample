@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
         });
 
-    // ヘッダーに関連する全てのフォームデータを取得
+    // 全てのフォームデータを取得
     function getAllFormData() {
         const formData = [];
         const headers = document.querySelectorAll('.header-content');
@@ -69,15 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // 通常のフォームフィールドとテーブル内のフィールドをすべて取得
             const inputs = header.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
-                const inputName = input.name || `input${Math.random().toString(36).substring(7)}`;
                 if (input.closest('table')) {
                     // テーブル内の入力はテーブルIDに関連付ける
-                    const tableId = input.closest('table').getAttribute('data-table-id') || `table${headerFormData.headerId}`;
-                    headerFormData[tableId] = headerFormData[tableId] || [];
-                    const cellData = { [inputName]: input.value };
+                    const tableId = input.closest('table').getAttribute('data-table-id') || `table_${headerId}`;
+                    if (!headerFormData[tableId]) {
+                        headerFormData[tableId] = [];
+                    }
+                    const cellData = { name: input.name, value: input.value };
                     headerFormData[tableId].push(cellData);
                 } else {
-                    headerFormData[inputName] = input.value;
+                    headerFormData[input.name] = input.value;
                 }
             });
 
@@ -107,7 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
 
@@ -120,7 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadJSON(combinedData, 'combinedData.json');
     });
 
-    // デバッグ用にコンソールに出力
-    console.log('Headers Data:', getDataFromHeaders(headersData?.headers || []));
-    console.log('Form Data:', getAllFormData());
+    // ヘッダーデータ取得用関数
+    function getDataFromHeaders(headers) {
+        return headers.map(header => {
+            const result = {
+                id: header.id,
+                type: header.type,
+                text: header.text,
+                contentId: header.templateId,
+                children: header.children ? getDataFromHeaders(header.children) : []
+            };
+            return result;
+        });
+    }
 });
