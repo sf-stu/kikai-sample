@@ -1,8 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
-    function createHeaderElement(type, text, id) {
+    const headersDataUrl = 'headersData.json';
+    const templatesUrl = 'templates.json';
+
+    function fetchJSON(url) {
+        return fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                throw error;
+            });
+    }
+
+    function createHeaderElement(type, text) {
         const headerDiv = document.createElement('div');
         headerDiv.className = `sticky-header header-${type}`;
-        headerDiv.id = id;
         headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}`;
         return headerDiv;
     }
@@ -14,108 +30,64 @@ document.addEventListener('DOMContentLoaded', () => {
         return contentDiv;
     }
 
-    function getFormData(formId) {
-        const form = document.getElementById(formId);
-        if (!form) return null;
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
+    function renderHeaders(headers, parentElement) {
+        headers.forEach(header => {
+            const headerElement = createHeaderElement(header.type, header.text);
+            parentElement.appendChild(headerElement);
+            const contentElement = createContentElement(templates[header.templateId]?.html || '');
+            parentElement.appendChild(contentElement);
+            if (header.children && header.children.length > 0) {
+                renderHeaders(header.children, parentElement);
+            }
         });
-        return data;
     }
 
-    function extractHeaderData(headers) {
-        let headerData = [];
-        headers.forEach(header => {
-            const headerItem = {
+    let headersData, templates;
+
+    Promise.all([fetchJSON(headersDataUrl), fetchJSON(templatesUrl)])
+        .then(([data, tmpl]) => {
+            console.log('Fetched headers data:', data);
+            console.log('Fetched templates:', tmpl);
+            headersData = data;
+            templates = tmpl;
+            const headersContainer = document.getElementById('headers-container');
+            renderHeaders(headersData.headers, headersContainer);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    // データ取得用関数
+    function getDataFromHeaders(headers) {
+        return headers.map(header => {
+            const result = {
                 id: header.id,
                 type: header.type,
                 text: header.text,
-                content: null,  // Placeholder for content
-                children: [],
-                formData: null  // Placeholder for form data
+                contentId: header.templateId,
+                children: header.children ? getDataFromHeaders(header.children) : []
             };
-
-            if (header.children && header.children.length > 0) {
-                headerItem.children = extractHeaderData(header.children);
-            }
-
-            headerData.push(headerItem);
-        });
-        return headerData;
-    }
-
-    function addContentToHeaders(headers, templates) {
-        headers.forEach(header => {
-            if (header.children && header.children.length > 0) {
-                addContentToHeaders(header.children, templates);
-            }
-
-            // Add content if this header has a templateId
-            if (header.templateId) {
-                header.content = templates[header.templateId].html;
-            }
+            return result;
         });
     }
 
-    function addFormDataToHeaders(headers, formId) {
-        headers.forEach(header => {
-            if (header.children && header.children.length > 0) {
-                addFormDataToHeaders(header.children, formId);
-            }
+    // フォームデータ取得用
+    function getFormData() {
+        const forms = document.querySelectorAll('.header-content form');
+        const formData = [];
 
-            // Add form data if this header's template is a form
-            if (header.templateId === formId) {
-                const formData = getFormData(formId);
-                header.formData = formData;
-            }
-        });
-    }
-
-    function renderHeaders(headers, parentElement) {
-        headers.forEach(header => {
-            const headerElement = createHeaderElement(header.type, header.text, header.id);
-            parentElement.appendChild(headerElement);
-            if (header.content) {
-                const contentElement = createContentElement(header.content);
-                parentElement.appendChild(contentElement);
-            }
-
-            if (header.children && header.children.length > 0) {
-                const childrenContainer = document.createElement('div');
-                parentElement.appendChild(childrenContainer);
-                renderHeaders(header.children, childrenContainer);
-            }
-        });
-    }
-
-    function handleFormSubmission(formId, headersData) {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', (event) => {
-                event.preventDefault(); // Prevent the default form submission
-                const headersInfo = extractHeaderData(headersData.headers);
-                addContentToHeaders(headersInfo, templates);
-                addFormDataToHeaders(headersInfo, formId);
-                const outputData = {
-                    headers: headersInfo
-                };
-                console.log('Output Data:', JSON.stringify(outputData, null, 2));
+        forms.forEach(form => {
+            const formObject = {};
+            new FormData(form).forEach((value, key) => {
+                formObject[key] = value;
             });
-        }
+            formData.push(formObject);
+        });
+
+        return formData;
     }
 
-    const headersContainer = document.getElementById('headers-container');
-
-    // Fetch headersData.json and templates.json, then render headers
-    Promise.all([
-        fetch('headersData.json').then(response => response.json()),
-        fetch('templates.json').then(response => response.json())
-    ])
-    .then(([headersData, templates]) => {
-        renderHeaders(headersData.headers, headersContainer);
-        handleFormSubmission('form1-form', headersData); // Ensure to call this after headers are rendered
-    })
-    .catch(error => console.error('Error loading data:', error));
+    // デバッグ用にコンソールに出力
+    console.log('Headers Data:', getDataFromHeaders(headersData?.headers || []));
+    console.log('Form Data:', getFormData());
 });
