@@ -16,25 +16,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    function createHeaderElement(type, text) {
+    function createHeaderElement(type, text, id) {
         const headerDiv = document.createElement('div');
         headerDiv.className = `sticky-header header-${type}`;
-        headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}`;
+        headerDiv.setAttribute('data-header-id', id); // ヘッダーIDを属性として設定
+        headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : 'child' ? '2' : '3'}`;
         return headerDiv;
     }
 
-    function createContentElement(content) {
+    function createContentElement(content, headerId) {
         const contentDiv = document.createElement('div');
         contentDiv.className = 'header-content';
+        contentDiv.setAttribute('data-header-id', headerId); // ヘッダーIDを属性として設定
         contentDiv.innerHTML = content;
         return contentDiv;
     }
 
     function renderHeaders(headers, parentElement) {
         headers.forEach(header => {
-            const headerElement = createHeaderElement(header.type, header.text);
+            const headerElement = createHeaderElement(header.type, header.text, header.id);
             parentElement.appendChild(headerElement);
-            const contentElement = createContentElement(templates[header.templateId]?.html || '');
+            const contentElement = createContentElement(templates[header.templateId]?.html || '', header.id);
             parentElement.appendChild(contentElement);
             if (header.children && header.children.length > 0) {
                 renderHeaders(header.children, parentElement);
@@ -46,8 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     Promise.all([fetchJSON(headersDataUrl), fetchJSON(templatesUrl)])
         .then(([data, tmpl]) => {
-            console.log('Fetched headers data:', data);
-            console.log('Fetched templates:', tmpl);
             headersData = data;
             templates = tmpl;
             const headersContainer = document.getElementById('headers-container');
@@ -77,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = [];
 
         forms.forEach(form => {
-            const formObject = {};
+            const headerId = form.closest('.header-content').getAttribute('data-header-id');
+            const formObject = { headerId }; // ヘッダーIDを含める
             new FormData(form).forEach((value, key) => {
                 formObject[key] = value;
             });
@@ -86,6 +87,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return formData;
     }
+
+    // JSONデータをテキストファイルとしてダウンロード
+    function downloadTextFile(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ボタンクリック時の処理
+    document.getElementById('export-json').addEventListener('click', () => {
+        const headers = JSON.stringify(getDataFromHeaders(headersData?.headers || []), null, 2);
+        const forms = JSON.stringify(getFormData(), null, 2);
+        const combinedText = `Headers Data:\n${headers}\n\nForm Data:\n${forms}`;
+        downloadTextFile(combinedText, 'combinedData.txt');
+    });
 
     // デバッグ用にコンソールに出力
     console.log('Headers Data:', getDataFromHeaders(headersData?.headers || []));
