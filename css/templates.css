@@ -1,4 +1,6 @@
-/* テーブルスタイル */
+/*
+/*templatesのCSS*/
+/*
 table, th, td {
     width: 100%;
     border-collapse: collapse;
@@ -6,8 +8,6 @@ table, th, td {
     padding: 8px;
     text-align: left;
 }
-
-/* フォーム要素 */
 input[type="text"], input[type="email"], input[type="radio"], button {
     width: 95%;
     padding: 8px;
@@ -24,3 +24,4 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+*/
