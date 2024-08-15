@@ -1,18 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('data/headersData.json')
-        .then(response => response.json())
-        .then(headersData => {
-            const templates = {};
-            fetch('data/templates.json')
-                .then(response => response.json())
-                .then(data => {
-                    Object.assign(templates, data);
-                    const headersContainer = document.getElementById('headers-container');
-                    renderHeaders(headersData.headers, headersContainer);
-                })
-                .catch(error => console.error('Error loading templates:', error));
-        })
-        .catch(error => console.error('Error loading headersData:', error));
+    const headersDataUrl = 'data/headersData.json';
+    const templatesUrl = 'data/templates.json';
+
+    function fetchJSON(url) {
+        return fetch(url)
+            .then(response => response.json())
+            .catch(error => {
+                console.error('Error loading data:', error);
+                throw error;
+            });
+    }
 
     function createHeaderElement(type, text) {
         const headerDiv = document.createElement('div');
@@ -32,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers.forEach(header => {
             const headerElement = createHeaderElement(header.type, header.text);
             parentElement.appendChild(headerElement);
-            const contentElement = createContentElement(templates[header.templateId].html);
+            const contentElement = createContentElement(templates[header.templateId]?.html || '');
             parentElement.appendChild(contentElement);
             if (header.children && header.children.length > 0) {
                 renderHeaders(header.children, parentElement);
@@ -40,29 +37,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    let headersData, templates;
+
+    Promise.all([fetchJSON(headersDataUrl), fetchJSON(templatesUrl)])
+        .then(([data, tmpl]) => {
+            headersData = data;
+            templates = tmpl;
+            const headersContainer = document.getElementById('headers-container');
+            renderHeaders(headersData.headers, headersContainer);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    // データ取得用関数
+    function getDataFromHeaders(headers) {
+        return headers.map(header => {
+            const result = {
+                id: header.id,
+                type: header.type,
+                text: header.text,
+                contentId: header.templateId,
+                children: header.children ? getDataFromHeaders(header.children) : []
+            };
+            return result;
+        });
+    }
+
+    // フォームデータ取得用
     function getFormData() {
-        const headers = document.querySelectorAll('.sticky-header');
-        const formData = {};
+        const forms = document.querySelectorAll('.header-content form');
+        const formData = [];
 
-        headers.forEach(header => {
-            const id = header.getAttribute('id');
-            const content = header.nextElementSibling;
-
-            if (content) {
-                const formElements = content.querySelectorAll('input, textarea, select');
-                formData[id] = Array.from(formElements).reduce((data, element) => {
-                    data[element.name || element.id] = element.value;
-                    return data;
-                }, {});
-            }
+        forms.forEach(form => {
+            const formObject = {};
+            new FormData(form).forEach((value, key) => {
+                formObject[key] = value;
+            });
+            formData.push(formObject);
         });
 
         return formData;
     }
 
-    document.getElementById('export-json').addEventListener('click', () => {
-        const formData = getFormData();
-        const json = JSON.stringify(formData, null, 2);
-        console.log(json);
-    });
+    // デバッグ用にコンソールに出力
+    console.log('Headers Data:', getDataFromHeaders(headersData.headers));
+    console.log('Form Data:', getFormData());
 });
