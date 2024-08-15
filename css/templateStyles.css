@@ -1,0 +1,26 @@
+/* テーブルスタイル */
+table, th, td {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #999;
+    padding: 8px;
+    text-align: left;
+}
+
+/* フォーム要素 */
+input[type="text"], input[type="email"], input[type="radio"], button {
+    width: 95%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
