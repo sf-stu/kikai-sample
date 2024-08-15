@@ -110,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch headersData.json and templates.json, then render headers
     Promise.all([
-        fetch('headersData.json').then(response => response.json()),
-        fetch('templates.json').then(response => response.json())
+        fetch('data/headersData.json').then(response => response.json()),
+        fetch('data/templates.json').then(response => response.json())
     ])
     .then(([headersData, templates]) => {
         renderHeaders(headersData.headers, headersContainer);
