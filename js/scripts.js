@@ -104,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportButton = document.getElementById('export-json');
 
     Promise.all([
-        fetch('data/headersData.json').then(response => response.json()),
-        fetch('data/templates.json').then(response => response.json())
+        fetch('headersData.json').then(response => response.json()),
+        fetch('templates.json').then(response => response.json())
     ])
     .then(([headersData, templates]) => {
         renderHeaders(headersData.headers, headersContainer);
