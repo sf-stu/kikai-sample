@@ -69,7 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // 通常のフォームフィールドとテーブル内のフィールドをすべて取得
             const inputs = header.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
-                if (input.closest('table')) {
+                if (input.type === 'radio') {
+                    if (input.checked) {
+                        headerFormData[input.name] = input.value;
+                    }
+                } else if (input.closest('table')) {
                     // テーブル内の入力はテーブルIDに関連付ける
                     const tableId = input.closest('table').getAttribute('data-table-id') || `table_${headerId}`;
                     if (!headerFormData[tableId]) {
