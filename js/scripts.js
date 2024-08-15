@@ -79,8 +79,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return formData;
     }
-
-    // デバッグ用にコンソールに出力
-    console.log('Headers Data:', getDataFromHeaders(headersData.json));
-    console.log('Form Data:', getFormData());
 });
