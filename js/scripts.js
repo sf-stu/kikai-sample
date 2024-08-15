@@ -69,14 +69,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // 通常のフォームフィールドとテーブル内のフィールドをすべて取得
             const inputs = header.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
+                const inputName = input.name || `input${Math.random().toString(36).substring(7)}`;
                 if (input.closest('table')) {
                     // テーブル内の入力はテーブルIDに関連付ける
                     const tableId = input.closest('table').getAttribute('data-table-id') || `table${headerFormData.headerId}`;
                     headerFormData[tableId] = headerFormData[tableId] || [];
-                    const cellData = { name: input.name, value: input.value };
+                    const cellData = { [inputName]: input.value };
                     headerFormData[tableId].push(cellData);
                 } else {
-                    headerFormData[input.name] = input.value;
+                    headerFormData[inputName] = input.value;
                 }
             });
 
