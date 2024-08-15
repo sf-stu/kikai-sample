@@ -92,19 +92,19 @@
             "id": "header5",
             "type": "parent",
             "text": "親ヘッダー5",
-            "templateId": "form1",
+            "templateId": "radio1",
             "children": [
                 {
                     "id": "header5-1",
                     "type": "child",
                     "text": "子ヘッダー5-1",
-                    "templateId": "table1",
+                    "templateId": "form1",
                     "children": [
                         {
                             "id": "header5-1-1",
                             "type": "grandchild",
                             "text": "孫ヘッダー5-1-1",
-                            "templateId": "radio1"
+                            "templateId": "table1"
                         }
                     ]
                 }
