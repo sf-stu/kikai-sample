@@ -1,11 +1,10 @@
-{
+const json = {
     "form1": {
         "html": "<div class='content'>\n" +
                 "<form id='form1'>\n" +
                 "<label>Name: <input type='text' name='name' /></label>\n" +
                 "<label>Email: <input type='email' name='email' /></label>\n" +
-                "<br><br>"\n +
-                "<button type='submit'>一時保存</button>\n" +
+                "<button type='submit'>送信</button>\n" +
                 "</form>\n" +
                 "</div>"
     },
@@ -21,8 +20,7 @@
                 "<td><input type='text' name='item2' /></td>\n" +
                 "</tr>\n" +
                 "</table>\n" +
-                "<br><br>"\n +
-                "<button type='submit'>一時保存</button>\n" +
+                "<button type='submit'>送信</button>\n" +
                 "</div>"
     },
     "radio1": {
@@ -31,9 +29,8 @@
                 "<label><input type='radio' name='choice' value='選択肢1'>選択肢1</label>\n" +
                 "<label><input type='radio' name='choice' value='選択肢2'>選択肢2</label>\n" +
                 "<label><input type='radio' name='choice' value='選択肢3'>選択肢3</label>\n" +
-                "<br><br>"\n +
-                "<button type='submit'>一時保存</button>\n" +
+                "<button type='submit'>送信</button>\n" +
                 "</form>\n" +
                 "</div>"
     }
-}
+};
