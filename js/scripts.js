@@ -1,19 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const headersDataUrl = 'data/headersData.json';
-    const templatesUrl = 'data/templates.json';
-
-    function fetchJSON(url) {
-        return fetch(url)
-            .then(response => response.json())
-            .catch(error => {
-                console.error('Error loading data:', error);
-                throw error;
-            });
-    }
-
-    function createHeaderElement(type, text) {
+    function createHeaderElement(type, text, id) {
         const headerDiv = document.createElement('div');
         headerDiv.className = `sticky-header header-${type}`;
+        headerDiv.id = id;
         headerDiv.innerHTML = `<h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}>${text}</h${type === 'parent' ? '1' : type === 'child' ? '2' : '3'}`;
         return headerDiv;
     }
@@ -25,58 +14,108 @@ document.addEventListener('DOMContentLoaded', () => {
         return contentDiv;
     }
 
-    function renderHeaders(headers, parentElement) {
+    function getFormData(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return null;
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+        return data;
+    }
+
+    function extractHeaderData(headers) {
+        let headerData = [];
         headers.forEach(header => {
-            const headerElement = createHeaderElement(header.type, header.text);
-            parentElement.appendChild(headerElement);
-            const contentElement = createContentElement(templates[header.templateId]?.css || '');
-            parentElement.appendChild(contentElement);
+            const headerItem = {
+                id: header.id,
+                type: header.type,
+                text: header.text,
+                content: null,  // Placeholder for content
+                children: [],
+                formData: null  // Placeholder for form data
+            };
+
             if (header.children && header.children.length > 0) {
-                renderHeaders(header.children, parentElement);
+                headerItem.children = extractHeaderData(header.children);
+            }
+
+            headerData.push(headerItem);
+        });
+        return headerData;
+    }
+
+    function addContentToHeaders(headers, templates) {
+        headers.forEach(header => {
+            if (header.children && header.children.length > 0) {
+                addContentToHeaders(header.children, templates);
+            }
+
+            // Add content if this header has a templateId
+            if (header.templateId) {
+                header.content = templates[header.templateId].html;
             }
         });
     }
 
-    let headersData, templates;
+    function addFormDataToHeaders(headers, formId) {
+        headers.forEach(header => {
+            if (header.children && header.children.length > 0) {
+                addFormDataToHeaders(header.children, formId);
+            }
 
-    Promise.all([fetchJSON(headersDataUrl), fetchJSON(templatesUrl)])
-        .then(([data, tmpl]) => {
-            headersData = data;
-            templates = tmpl;
-            const headersContainer = document.getElementById('headers-container');
-            renderHeaders(headersData.headers, headersContainer);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-
-    // データ取得用関数
-    function getDataFromHeaders(headers) {
-        return headers.map(header => {
-            const result = {
-                id: header.id,
-                type: header.type,
-                text: header.text,
-                contentId: header.templateId,
-                children: header.children ? getDataFromHeaders(header.children) : []
-            };
-            return result;
+            // Add form data if this header's template is a form
+            if (header.templateId === formId) {
+                const formData = getFormData(formId);
+                header.formData = formData;
+            }
         });
     }
 
-    // フォームデータ取得用
-    function getFormData() {
-        const forms = document.querySelectorAll('.header-content form');
-        const formData = [];
+    function renderHeaders(headers, parentElement) {
+        headers.forEach(header => {
+            const headerElement = createHeaderElement(header.type, header.text, header.id);
+            parentElement.appendChild(headerElement);
+            if (header.content) {
+                const contentElement = createContentElement(header.content);
+                parentElement.appendChild(contentElement);
+            }
 
-        forms.forEach(form => {
-            const formObject = {};
-            new FormData(form).forEach((value, key) => {
-                formObject[key] = value;
+            if (header.children && header.children.length > 0) {
+                const childrenContainer = document.createElement('div');
+                parentElement.appendChild(childrenContainer);
+                renderHeaders(header.children, childrenContainer);
+            }
+        });
+    }
+
+    function handleFormSubmission(formId, headersData) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent the default form submission
+                const headersInfo = extractHeaderData(headersData.headers);
+                addContentToHeaders(headersInfo, templates);
+                addFormDataToHeaders(headersInfo, formId);
+                const outputData = {
+                    headers: headersInfo
+                };
+                console.log('Output Data:', JSON.stringify(outputData, null, 2));
             });
-            formData.push(formObject);
-        });
-
-        return formData;
+        }
     }
+
+    const headersContainer = document.getElementById('headers-container');
+
+    // Fetch headersData.json and templates.json, then render headers
+    Promise.all([
+        fetch('headersData.json').then(response => response.json()),
+        fetch('templates.json').then(response => response.json())
+    ])
+    .then(([headersData, templates]) => {
+        renderHeaders(headersData.headers, headersContainer);
+        handleFormSubmission('form1-form', headersData); // Ensure to call this after headers are rendered
+    })
+    .catch(error => console.error('Error loading data:', error));
 });
